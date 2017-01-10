@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IST Demo</title>
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jquery.fancybox.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="fonts/font-awesome/css/font-awesome.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+    <script src="js/jquery.fancybox.pack.js"></script>
+    <script src="js/jquery.fancybox.pack.js"></script>
+    <script type="text/javascript">
+        //api:  http://www.ist.rit.edu/api/
+        $(document).ready(function(){
+            myXHR('get',{'path':'/about/'},'#about-data').done(function(json){ //console.log(json);
+                var x = '<div class="title"><h4 id="elem1">'+json.title+'</h4></div>';
+                x+='<p>'+json.description+'</p>';
+                x+='<blockquote>'+json.quote;
+                x+='<h6>'+json.quoteAuthor+'</h6></blockquote>';
+                $('#about').html(x);
+
+                //get undergraduate data
+                myXHR('get',{'path':'/degrees/undergraduate'},'#content').done(function(json){
+                    //console.log(json);
+                    //I have an object holding arrays
+                    var x='';
+                    $.each(json.undergraduate,function(i,item){
+                        x += '<div class="col s4"><div class="card">';
+                        x += '<div class="card-image center-align waves-effect waves-block waves-light"><i class=" large fa fa-globe activator"></i></div>';
+                        x += '<div class="card-content activator center-align">';
+                        x += '<span class="card-title activator grey-text text-darken-4">' + item.title + '<i class="material-icons right">more_vert</i></span>';
+                        x += '<p>' + item.description + '</p></div>';
+                        x += '<div class="card-reveal"><span class="card-title grey-text text-darken-4">Concentrations<i class="material-icons right">close</i></span>';
+                        x += '<p>' + item.concentrations + '</p><br />';
+                    });
+                    $('#ug-deg').append(x);
+                });
+                //get the undergrad minors data
+                myXHR('get',{'path':'/minors'},'#minors-data').done(function(json){
+                    //console.log(json);
+                    //I have an object holding arrays
+                    var x='';
+                    $.each(json.UgMinors,function(i,item){
+                        x+='<div class="col s3"><div class="card teal small valign-wrapper"><div class="card-title valign center-align white-text"><h5>'+item.title+'</h5></div><div class="card-action"><a href="#popup">Read More</a></div></div></div>';
+                    });
+                    $('#minors-deg').html(x);
+                });
+
+                //get the grad section and advanced certifications
+                myXHR('get',{'path':'/degrees/graduate'},'#grad-adc-data').done(function(json){
+                    //console.log(json);
+                    //I have an object holding arrays
+                    var x='';
+                    var y='';
+                    $.each(json.graduate,function(i,item){
+
+                        if(item.concentrations==undefined)
+                        {
+                            y+='<p>'+item.availableCertificates+'</p>';
+
+                        }
+                        else{
+                            x+='<div class="col s4"><div class="card"><div class="card-title center-align"><h4>'+item.title+'</h4></div>';
+                            x+='<div class="card-content"><p>'+item.description+'</p></div><div class="card-action"><a href="#">Know More</a></div></div></div>';
+                            //x+="<h3>"+item.concentrations+"</h3>";
+                        }
+
+
+                    });
+                    $('#grad-deg').html(x);
+                    $('#adv-cert').append(y);
+                });
+
+                //get the stats data
+                myXHR('get',{'path':'/employment'},'#stats-content').done(function(json){
+                    //console.log(json);
+                    //I have an object holding arrays
+                    var x='';
+                    var y='';
+                    var z='';
+                    x+='<div class="header center-align"><h4>'+json.introduction.title+'</h4></div>';
+                    x+='<div class="subheader" id="after"><h5 class="center-align">'+json.introduction.content[0].title+"</h5>";
+                    x+='<p>'+json.introduction.content[0].description+'</p></div>';
+                    $.each(json.degreeStatistics.statistics,function(i,item){
+                        y+='<div class="col s3"><h5>'+item.value+'</h5>';
+                        y+="<h6>"+item.description+"</h6></div>";
+                    });
+                    z+='<div class="subheader"><h5 class="center-align">'+json.introduction.content[1].title+'</h5>';
+                    z+='<p>'+json.introduction.content[1].description+'</p></div>';
+                    z+='<div class="center-align"><h5>'+json.employers.title+'</h5>';
+                    z+='<h6>'+json.employers.employerNames+'</h6>';
+                    z+='<h5>'+json.careers.title+'</h5>';
+                    z+='<h6>'+json.careers.careerNames+'</h6>';
+                    $('#stats-data').append(x);
+                    $('#stats-data>#after').after(y);
+
+                });
+
+
+
+                //path - just the faculty
+                myXHR('get',{'path':'/people/faculty/'},'#people-data').done(function(json){
+                    var x='';
+                    $.each(json.faculty,function(i,item){
+                        //console.log(item.imagePath);
+                        x+='<div class="col s3"><div class="card"><a class="waves-effect waves-light btn right">Read More</a><div class="card-image">';
+                        x+='<img height="200" width="200" src="'+item.imagePath+'"/></div>';
+                        x+='<div class="card-title center-align"><b>'+item.name+'</b></div>';
+                        x+='<div class="card-content center-align"><p>'+item.title+'</p></div>';
+                        x+='<div class="card-action"><h6><i class="material-icons">email</i>'+item.email+'</h6>';
+                        x+='<p><i class="material-icons">room</i>'+item.office+'</p>'
+                        x+='<p><i class="material-icons">flag</i>'+item.interestArea+'</div></div></div>';
+                    });
+                    $('#faculty').html(x);
+                });
+
+                //path - get the staff
+                myXHR('get',{'path':'/people/staff/'},'#staff-data').done(function(json){
+                    var x='';
+                    $.each(json.staff,function(i,item){
+                        //console.log(item.imagePath);
+                        x+='<div class="col s3"><div class="card"><a class="waves-effect waves-light btn right">Read More</a><div class="card-image">';
+                        x+='<img height="200" width="200" src="'+item.imagePath+'"/></div>';
+                        x+='<div class="card-title center-align"><b>'+item.name+'</b></div>';
+                        x+='<div class="card-content center-align"><p>'+item.title+'</p></div>';
+                        x+='<div class="card-action"><h6><i class="material-icons">email</i>'+item.email+'</h6>';
+                        x+='<p><i class="material-icons">room</i>'+item.office+'</p></div></div></div>';
+                    });
+                    $('#staff').html(x);
+                });
+
+                // co - op table data attempt
+                myXHR('get',{'path':'/employment/'},'#coop-data').done(function(json){ //console.log(json);
+                    var x='';
+                    //console.log(json.coopTable.coopInformation);
+                    $.each(json.coopTable.coopInformation,function(i,item){
+                        x+='<tr><td>'+item.employer+'</td></tr>';
+                    });
+                    $('#table-1').append(x);
+                });
+            });
+
+        });
+
+        ///////////////////////////////////////Ajax util/////////////////////////////////
+        ////in: (t,d)
+        //// t = "get" or "post"
+        //// d = {"path":"/undergrad."}
+        ////return:ajax object ready to consume the callback
+        /////////////////////////////////////////////////////
+
+
+        function myXHR(t,d,id)
+        {
+            return  $.ajax({
+                type:t,
+                dataType:'json',
+                cache:false,
+                async:true,
+                url:'proxy.php',
+                data:d,
+                beforeSend:function(){
+                    //happen before send
+                    $(id).append('<img src="dots.gif" class="dots" />');
+
+
+                        }
+            }).always(function(){
+                //happen no matter what
+                //   $(id).append('<img src="gears.gif"class="gears"/>');
+                $(id).find('.dots').fadeOut(3000,function(){
+                    $(this).remove();
+                });
+            }).fail(function(){
+                //handle failure
+
+            }).done(function(){
+
+            });
+        }
+
+    </script>
+
+
+</head>
+<body>
+<div class="navbar-fixed">
+    <nav class="light-blue lighten-1" role="navigation">
+        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Logo</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#ug-deg">Undergrad</a></li>
+                <li><a href="#grad-deg">Grad</a></li>
+            </ul>
+
+            <ul id="nav-mobile" class="side-nav" style="left: 0px;">
+                <li><a href="#ug-deg">Undergrad</a></li>
+                <li><a href="#grad-deg">Grad</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+</div>
+<!--*************ABOUT SECTION***************-->
+<div class="parallax-container">
+    <div class="parallax">
+        <div class="section center-align">
+        <div id="particles-js">
+            <div class="scene">
+                <div class="actor">
+                    <div class="actor__prefix">-</div>
+                    <div id="vader" class="actor__content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="container" id="about"></div>
+
+<main>
+<!-------************UNDERGRAD SECTION********-->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section">
+            <div class="title">
+                <h3>Our Undergraduate degrees</h3>
+            </div>
+            <div class="row" id="ug-deg">
+                <!--ug degress ajax data here -->
+            </div>
+            </div>
+        </div>
+    </div>
+
+<!------ ****************UG MINORS SECTION ******************------->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section">
+            <div class="title">
+                <h3>Our UG MINORS </h3>
+            </div>
+            <div class="row" id="minors-deg">
+                <h4>Advanced Certifications</h4>
+                <!--Load ug minors ajax data here-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!------ ******************GRAD SECTION************** ----------->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section">
+        <div class="title">
+          <h3>Our Graduate Degrees</h3>
+        </div>
+        <div class="row" id="grad-deg">
+            <!--Load grad degrees ajax data here -->
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <div class="title">
+                    <h4>Advanced Certifications</h4>
+                </div>
+                <div id="adv-cert">
+                    <!-- load advanced certificates here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+<!--****************STATS SECTION**********************-->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section" id="stats-data">
+        <div class="row" id="row-data"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--***************Map and Employment Tables Section********************* -->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section">
+            <div class="title center-align">
+                <h4>Where our Students work</h4>
+            </div>
+            <div id="iframe" class="center-align">
+                <iframe src="https://www.ist.rit.edu/api/map" style="width:600px; height: 600px; border: none"></iframe>
+            </div>
+            <div class="row">
+                <div class="col s6">
+                    <div class="card-panel">
+                        <div class="card-title center-align" style="padding: 30px;">
+                            <h4>Co-op Table</h4>
+                        </div>
+                        <div class="card-action">
+                            <a href="#">This is a link</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s6">
+                    <div class="card-panel">
+                        <div class="card-title center-align" style="padding:30px;">
+                            <h4>Employment Table</h4>
+                        </div>
+                        <div class="card-action">
+                            <a href="#">This is a link</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PEOPLE SECTION --->
+<div class="card" style="box-shadow: none">
+    <div class="container">
+        <div class="section">
+            <div class="row">
+                <div class="col s12">
+                    <ul class="tabs">
+                        <li class="tab col s3">
+                            <a href="#faculty">Faculty</a>
+                        </li>
+                        <li class="tab col s3">
+                            <a href="#staff">Staff</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row" id="faculty"></div>
+            <div class="row" id="staff"></div>
+        </div>
+    </div>
+</div>
+</main>
+
+<script src="js/particles.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/theater.min.js"></script>
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script>
+    var theater = theaterJS()
+
+    theater
+            .on('type:start, erase:start', function () {
+                theater.getCurrentActor().$element.classList.add('actor__content--typing')
+            })
+            .on('type:end, erase:end', function () {
+                theater.getCurrentActor().$element.classList.remove('actor__content--typing')
+            })
+
+    theater
+            .addActor('vader',{ speed: 0.3, accuracy: 0.6 })
+            .addScene('vader:IST @ RIT', 1000)
+            .addScene('vader:Create', 400)
+            .addScene('vader:Ideate', 400)
+            .addScene('vader:Develop', 400)
+            .addScene('vader:Learn', 400)
+            .addScene('vader:Explore', 400)
+            .addScene('vader:Research', 400)
+            .addScene(theater.replay.bind(theater))
+</script>
+<script>
+    $(document).ready(function(){
+        $('.parallax').parallax();
+    });
+
+</script>
+<script>
+    $( document ).ready(function() {
+        $(".button-collapse").sideNav();
+    });
+</script>
+</body>
+</html>
